@@ -48,10 +48,35 @@
         <div class="col-md-4">
           <!-- Mars Facts -->
           <div class="row" id="mars-facts">
-             <h4>Mars Facts</h4>
-              {{ mars.facts | safe }}   
+            <h4>Mars Facts</h4>
+            {{ mars.facts | safe }}  
           </div>
         </div>
+      </div>
+
+      <!-- Add section for Mars hemisphere images -->
+      <div class="row" id="mars-hemispheres">
+        <h2>Mars Hemispheres</h2>
+        {% for hemisphere in hemispheres %}
+        <div class="col-md-3">
+          <div class="media">
+            <div class="media-body">
+              <h3 class="text-center">{{hemisphere.title}}</h3>
+              <a href={{hemisphere.img_url}} title="">
+                <img
+                  src="{{hemisphere.img_url | default('static/images/error.png', true) }}"
+                  class="img-thumbnail"
+
+                  alt="Responsive image"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+
       </div>
     </div>
   </body>

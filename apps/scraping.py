@@ -49,7 +49,7 @@ def featured_image(browser):
     
     # Error Handling
     try:
-        # Find the relati  ve image url
+        # Find the relative image url
         img_url_rel = img_soup.select_one('figure.lede a img').get("src")
     except AttributeError:
         return None
@@ -68,11 +68,55 @@ def mars_facts():
         return None
     
     # Assign column and set index of dataframe
-    df.columns=['description', 'value']
-    df.set_index('description', inplace=True)
+    df.columns=['Description', 'Value']
+    # df.set_index('description', inplace=True)
     
     # Convert dataframe into HTML format, and bootstrap
-    return df.to_html()
+    return df.to_html(index=False, classes='table-striped', justify='center')
+
+def hemisphere_image(browser):
+    #Featured Image Download
+    # Set Variables
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    url_root = 'https://astrogeology.usgs.gov/'
+    subsites = []
+    hemispheres = []
+    
+    # Navigate to site will all the hemispere links
+    browser.visit(url)
+    # Convert the browser html to a soup object
+    html = browser.html
+    img_soup = BeautifulSoup(html, 'html.parser')
+
+    # Error Handling
+    try:
+        # Find the information for each hemisphere
+        products = img_soup.find_all('div', class_='item')
+
+        # Go through the information for each hemisphere and pull out the url for the full res image
+        for product in products:
+            url_partial = product.find('a').get('href')
+            url_subsite = url_root + url_partial
+            subsites.append(url_subsite)
+
+        # Go to each subsite and get the image url and title and append to a list
+        for subsite in subsites:
+            browser.visit(subsite)
+            html = browser.html
+            img_soup = BeautifulSoup(html, 'html.parser')
+            # Use the parent element of downloads then find first 'a' tag and get the href to get image url
+            img_url = img_soup.find("div", class_='downloads').select_one('a').get('href')
+            # Use the parent element of content and then h2 tag to get title
+            title = img_soup.find('div', class_='content').select_one('h2').get_text()
+            # Append to Hemispheres List
+            hemispheres.append({'title': title, 'img_url': img_url})
+
+
+    except AttributeError:
+        return None
+
+    
+    return hemispheres
 
 
 def scrape_all():
@@ -87,6 +131,7 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        "hemispheres": hemisphere_image(browser),
         "last_modified": dt.datetime.now()}
 
     browser.quit()
